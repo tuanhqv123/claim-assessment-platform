@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { Analytics } from "@vercel/analytics/next";
 import AppShell from "@/components/AppShell";
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({
         <AntdRegistry>
           <AppShell>{children}</AppShell>
         </AntdRegistry>
+        <Analytics />
       </body>
     </html>
   );
