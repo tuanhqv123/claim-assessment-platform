@@ -82,5 +82,5 @@ def run_assessment(
         key documenting every check performed.
     """
     result = assess_claim(claim, doc_store=doc_store, policy_store=policy_store)
-    result = apply_guards(claim, result)
+    result = apply_guards(claim, result, policy_store=policy_store)
     return _enforce_member_eligibility(claim, result, policy_store)

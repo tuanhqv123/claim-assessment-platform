@@ -2,9 +2,19 @@ import pytest
 from src.stores.medical_mapping import MedicalMapping
 
 
+# Synthetic mapping injected into the store — tests do no DB/network I/O.
+_FIXTURE = {
+    "J06.9": {
+        "description": "Acute upper respiratory infection, unspecified",
+        "valid_procedures": ["99213", "99214", "87880", "71046"],
+        "procedure_descriptions": {"99213": "Office/outpatient visit"},
+    },
+}
+
+
 @pytest.fixture
 def mapping():
-    return MedicalMapping()
+    return MedicalMapping(mapping=_FIXTURE)
 
 
 def test_valid_diagnosis_procedure_pair(mapping):

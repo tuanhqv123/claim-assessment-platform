@@ -120,8 +120,8 @@ src/
   tenant/                   multi-tenant config schema / runtime
   nodes/  stores/           agent tool internals + data stores
 config/workflow.json        workflow state machine definition
-data/                       seed policies/mappings + sample documents
-supabase/migrations/        Postgres + pgvector schema
+supabase/migrations/        Postgres + pgvector schema (incl. medical_codes,
+                            policies, members — all reference/data lives in DB)
 web/                        Next.js frontend (member / assessor / admin)
 Dockerfile(.gpu)            backend images (CPU / CUDA)
 docker-compose*.yml         single-port stack / backend-only deploy

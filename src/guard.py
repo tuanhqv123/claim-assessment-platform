@@ -41,10 +41,24 @@ _COMPLETE_STATUSES = {"COMPLETE"}
 # this set is "unknown" and must NOT have a fabricated required document applied.
 _KNOWN_CLAIM_TYPES = {"OUTPATIENT", "INPATIENT", "DENTAL", "MATERNITY"}
 
-_policy_store = PolicyStore()
+
+def _resolve_policy(claim, tool_call_log, policy_store):
+    """Resolve the policy for guard checks from live data only — never a
+    file-backed store. Prefer the injected DB-backed ``policy_store``; otherwise
+    fall back to the ``lookupPolicy`` output the agent already produced (which
+    is itself the DB policy)."""
+    pid = (claim or {}).get("policy_id", "")
+    if policy_store is not None and pid:
+        resolved = policy_store.lookup(pid)
+        if resolved:
+            return resolved
+    out = _latest_tool_output(tool_call_log, "lookupPolicy")
+    if isinstance(out, dict) and "error" not in out:
+        return out
+    return None
 
 
-def apply_guards(claim: dict, result: dict) -> dict:
+def apply_guards(claim: dict, result: dict, policy_store=None) -> dict:
     """Apply deterministic guard rules to an agent ``result``.
 
     Args:
@@ -52,6 +66,9 @@ def apply_guards(claim: dict, result: dict) -> dict:
             ``submitted_document_ids`` are used when available).
         result: the agent result, expected to contain ``recommendation`` and
             ``tool_call_log`` (entries shaped ``{tool_name, inputs, outputs}``).
+        policy_store: optional DB-backed PolicyStore so limit/eligibility checks
+            use the live policy. Falls back to the lookupPolicy output in the
+            tool log when omitted.
 
     Returns:
         A deep-copied, possibly-adjusted result with an added ``guard_flags``
@@ -63,7 +80,7 @@ def apply_guards(claim: dict, result: dict) -> dict:
     original_recommendation = result.get("recommendation", "UNKNOWN")
     tool_call_log = result.get("tool_call_log") or []
 
-    policy = _policy_store.lookup((claim or {}).get("policy_id", ""))
+    policy = _resolve_policy(claim, tool_call_log, policy_store)
 
     # A claim_type is "known" only if it appears in the required-docs map or as a
     # benefit type on the resolved policy. PolicyStore.get_required_documents
@@ -346,8 +363,7 @@ def _evaluate_over_limit(claim: dict, benefit_output: dict | None, policy: dict 
         return flag
 
     # Cross-check against the policy benefit limit when we can resolve it.
-    if policy is None:
-        policy = _policy_store.lookup((claim or {}).get("policy_id", ""))
+    # ``policy`` is resolved upstream from the DB store / lookupPolicy output.
     sub_benefit = (claim or {}).get("sub_benefit")
     limit = _policy_benefit_limit(policy, (claim or {}).get("claim_type", ""), sub_benefit)
     flag["policy_limit"] = limit

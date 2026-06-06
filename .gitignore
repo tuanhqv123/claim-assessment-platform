@@ -26,6 +26,10 @@ uploads/*
 !uploads/.gitkeep
 build.log
 
+# ── Test/sample data + internal tooling (kept locally, not in the product repo) ──
+data/sample_docs/
+scripts/
+
 # ── Harness (internal tracking — not part of the product) ──
 harness.db
 harness.db-wal

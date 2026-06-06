@@ -36,6 +36,30 @@ def _benefit_entry(covered_amount, decision="COVERED", reason="Fully covered") -
     }
 
 
+def _policy_entry() -> dict:
+    """Synthetic lookupPolicy output, mirroring the live DB policy shape. The
+    guard resolves benefit limits from this (the policy the agent looked up) —
+    never from a file-backed store."""
+    return {
+        "tool_name": "lookupPolicy",
+        "inputs": {"policyId": "POL-001"},
+        "outputs": {
+            "policy_id": "POL-001",
+            "benefits": [
+                {
+                    "type": "OUTPATIENT",
+                    "annual_limit": 100000,
+                    "sub_benefits": [
+                        {"name": "Doctor Visit", "limit_per_visit": 3000, "visits_per_year": 30},
+                        {"name": "Prescribed Medicine", "limit_per_visit": 3000},
+                        {"name": "Diagnostic Tests", "limit_per_year": 20000},
+                    ],
+                }
+            ],
+        },
+    }
+
+
 # --- Rule 1: missing required document --> REQUEST_MORE_INFO -----------------
 
 def test_missing_required_document_overrides_to_request_more_info():
@@ -134,6 +158,7 @@ def test_over_limit_approve_is_blocked():
         "recommendation": "APPROVE",
         "recommendation_reason": "approve full amount",
         "tool_call_log": [
+            _policy_entry(),
             _verify_entry("DOC-1", "medical_receipt"),
             _benefit_entry(covered_amount=9999, decision="COVERED"),
         ],
@@ -206,6 +231,7 @@ def test_over_limit_approve_blocked_when_sub_benefit_missing():
         "recommendation": "APPROVE",
         "recommendation_reason": "approve full amount",
         "tool_call_log": [
+            _policy_entry(),
             _verify_entry("DOC-1", "medical_receipt"),
             _benefit_entry(covered_amount=9999, decision="COVERED"),
         ],
@@ -233,6 +259,7 @@ def test_over_limit_approve_blocked_when_sub_benefit_casing_differs():
         "recommendation": "APPROVE",
         "recommendation_reason": "approve full amount",
         "tool_call_log": [
+            _policy_entry(),
             _verify_entry("DOC-1", "medical_receipt"),
             _benefit_entry(covered_amount=9999, decision="COVERED"),
         ],
