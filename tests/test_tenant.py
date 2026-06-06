@@ -7,7 +7,7 @@ import pytest
 
 from src.tenant.config_schema import validate_config
 from src.tenant.diff import ABSENT, diff_configs
-from src.tenant.fixtures import GOVHEALTH, HEALTHFIRST, SAFEGUARD, TENANTS
+from tests.tenant_fixtures import GOVHEALTH, HEALTHFIRST, SAFEGUARD, TENANTS
 from src.tenant.runtime import add_business_days, process_claim
 from src.tenant.versioning import next_version, rollback
 
