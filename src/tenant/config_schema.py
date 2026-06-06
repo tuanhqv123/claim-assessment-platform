@@ -7,8 +7,12 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
 
+def _default_branding() -> dict:
+    return {"company_name": "Insurance Co.", "logo_url": None, "primary_color": None, "secondary_color": None}
+
+
 class Branding(BaseModel):
-    company_name: str
+    company_name: str = "Insurance Co."
     logo_url: Optional[str] = None
     primary_color: Optional[str] = None
     secondary_color: Optional[str] = None
@@ -29,11 +33,15 @@ class NotificationRule(BaseModel):
     channels: List[str] = Field(default_factory=list)
 
 
+def _default_notification_rule() -> NotificationRule:
+    return NotificationRule(channels=["email"])
+
+
 class Notifications(BaseModel):
-    claim_submitted: NotificationRule
-    approved: NotificationRule
-    rejected: NotificationRule
-    payment_sent: NotificationRule
+    claim_submitted: NotificationRule = Field(default_factory=_default_notification_rule)
+    approved: NotificationRule = Field(default_factory=_default_notification_rule)
+    rejected: NotificationRule = Field(default_factory=_default_notification_rule)
+    payment_sent: NotificationRule = Field(default_factory=_default_notification_rule)
 
 
 class CustomField(BaseModel):
@@ -44,12 +52,12 @@ class CustomField(BaseModel):
 
 
 class TenantConfig(BaseModel):
-    branding: Branding
+    branding: Branding = Field(default_factory=Branding)
     claim_types: List[str]
     documents: dict[str, DocumentRequirements]
     auto_approval_threshold: float
     approval_tiers: List[ApprovalTier]
-    notifications: Notifications
+    notifications: Notifications = Field(default_factory=Notifications)
     sla: dict[str, int]
     custom_fields: List[CustomField] = Field(default_factory=list)
 
