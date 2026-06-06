@@ -1,0 +1,100 @@
+{
+  "states": [
+    "SUBMITTED",
+    "DOCUMENTS_VERIFIED",
+    "UNDER_ASSESSMENT",
+    "PENDING_INFO",
+    "APPROVED",
+    "REJECTED",
+    "PAYMENT_INITIATED",
+    "CLOSED",
+    "ESCALATED"
+  ],
+  "initial_state": "SUBMITTED",
+  "transitions": [
+    {
+      "from": "SUBMITTED",
+      "to": "DOCUMENTS_VERIFIED",
+      "preconditions": ["all_required_documents_present"],
+      "side_effects": ["notify_assessor_team"],
+      "role": "document_clerk"
+    },
+    {
+      "from": "DOCUMENTS_VERIFIED",
+      "to": "UNDER_ASSESSMENT",
+      "preconditions": ["assessor_assigned"],
+      "side_effects": ["log_assessment_start"],
+      "role": "team_lead"
+    },
+    {
+      "from": "UNDER_ASSESSMENT",
+      "to": "APPROVED",
+      "preconditions": ["assessment_complete", "amount_within_limit"],
+      "side_effects": ["notify_member", "create_payment_request"],
+      "role": "assessor"
+    },
+    {
+      "from": "UNDER_ASSESSMENT",
+      "to": "REJECTED",
+      "preconditions": ["assessment_complete", "rejection_reason_provided"],
+      "side_effects": ["notify_member_rejection"],
+      "role": "assessor"
+    },
+    {
+      "from": "UNDER_ASSESSMENT",
+      "to": "PENDING_INFO",
+      "preconditions": ["missing_info_description_provided"],
+      "side_effects": ["notify_member_info_request"],
+      "role": "assessor"
+    },
+    {
+      "from": "PENDING_INFO",
+      "to": "DOCUMENTS_VERIFIED",
+      "preconditions": ["new_info_received"],
+      "side_effects": ["reset_assessment_timer"],
+      "role": "document_clerk"
+    },
+    {
+      "from": "APPROVED",
+      "to": "PAYMENT_INITIATED",
+      "preconditions": ["payment_request_created"],
+      "side_effects": ["trigger_payment_system"],
+      "role": "finance"
+    },
+    {
+      "from": "PAYMENT_INITIATED",
+      "to": "CLOSED",
+      "preconditions": ["payment_confirmed"],
+      "side_effects": ["notify_member_payment"],
+      "role": "finance"
+    },
+    {
+      "from": "REJECTED",
+      "to": "CLOSED",
+      "preconditions": ["appeal_period_expired_or_acknowledged"],
+      "side_effects": ["archive_claim"],
+      "role": "system"
+    },
+    {
+      "from": "DOCUMENTS_VERIFIED",
+      "to": "ESCALATED",
+      "preconditions": [],
+      "side_effects": ["escalate_to_team_lead"],
+      "role": "team_lead"
+    },
+    {
+      "from": "ESCALATED",
+      "to": "CLOSED",
+      "preconditions": ["escalation_resolved"],
+      "side_effects": ["archive_claim"],
+      "role": "team_lead"
+    }
+  ],
+  "cycle": {
+    "count_on_entry_to": "PENDING_INFO",
+    "guard_state": "UNDER_ASSESSMENT",
+    "loop_from_state": "DOCUMENTS_VERIFIED",
+    "max_cycles": 3,
+    "error_message": "Maximum information requests exceeded — escalate to team lead"
+  }
+}

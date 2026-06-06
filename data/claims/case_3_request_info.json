@@ -1,0 +1,14 @@
+{
+  "claim_id": "CLM-003",
+  "policy_id": "POL-003",
+  "member_id": "MBR-020",
+  "claim_type": "INPATIENT",
+  "sub_benefit": "Surgery",
+  "diagnosis_code": "K35.80",
+  "diagnosis_description": "Acute appendicitis, unspecified",
+  "procedure_codes": ["44950"],
+  "amount": 150000,
+  "claim_date": "2024-04-20",
+  "provider": "Bangkok Hospital",
+  "submitted_document_ids": ["DOC-020", "DOC-021"]
+}

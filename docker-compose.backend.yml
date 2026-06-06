@@ -1,0 +1,18 @@
+# Backend-only deploy (frontend lives on Vercel). GPU image, exposed on :2108.
+# Secrets come from ./.env on the server (never baked into the image).
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    env_file: ./.env
+    ports:
+      - "2108:8000"
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

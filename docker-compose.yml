@@ -1,0 +1,52 @@
+# Claim-assessment platform — single public port (Caddy). Backend + frontend
+# stay on the internal network; only the proxy publishes a host port.
+#
+#   HTTP_PORT  host port to expose (default 8080)
+#
+# Backend reads LLM/OCR/Supabase creds from ./.env (env_file below).
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu   # CPU-only host? -> change to: Dockerfile
+    env_file: ./.env
+    expose:
+      - "8000"
+    restart: unless-stopped
+    # GPU access (NVIDIA Container Toolkit required). Drop this block when
+    # building with the CPU Dockerfile.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    expose:
+      - "3000"
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "${HTTP_PORT:-8080}:80"   # the only port exposed to the outside
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - web
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

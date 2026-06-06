@@ -1,0 +1,40 @@
+# Backend (GPU): FastAPI claim-assessment agent with fastembed-gpu on CUDA.
+# bge-small embeddings run on the GPU via onnxruntime's CUDAExecutionProvider.
+# Base carries CUDA 12.6 + cuDNN 9 runtime (matches onnxruntime-gpu >= 1.19;
+# host driver must support >= CUDA 12.6). Requires the NVIDIA Container Toolkit.
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONUNBUFFERED=1
+# Use the GPU when present, fall back to CPU if the CUDA provider can't load.
+ENV EMBED_PROVIDERS="CUDAExecutionProvider,CPUExecutionProvider"
+
+# Python 3.12 (Ubuntu 24.04 default), pip, and poppler (pdftoppm) for PDF OCR.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3 python3-pip python3-venv poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Isolated venv so we avoid Ubuntu's PEP 668 externally-managed restriction.
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+WORKDIR /app
+
+COPY requirements-server-gpu.txt .
+RUN pip install --upgrade pip \
+    && pip install -r requirements-server-gpu.txt
+
+# NOTE: the bge-small model (~80MB) is NOT baked in — fastembed downloads it
+# lazily on first use at runtime (mount a volume on the HF cache to persist it).
+
+COPY api.py run_agent.py ./
+COPY src ./src
+COPY config ./config
+COPY data ./data
+RUN mkdir -p uploads
+
+EXPOSE 8000
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]

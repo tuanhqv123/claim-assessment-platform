@@ -1,0 +1,44 @@
+{
+  "DOC-001": {
+    "document_id": "DOC-001",
+    "document_type": "medical_receipt",
+    "status": "COMPLETE",
+    "claim_id": "CLM-001",
+    "issues": []
+  },
+  "DOC-002": {
+    "document_id": "DOC-002",
+    "document_type": "prescription",
+    "status": "COMPLETE",
+    "claim_id": "CLM-001",
+    "issues": []
+  },
+  "DOC-010": {
+    "document_id": "DOC-010",
+    "document_type": "medical_receipt",
+    "status": "COMPLETE",
+    "claim_id": "CLM-002",
+    "issues": []
+  },
+  "DOC-011": {
+    "document_id": "DOC-011",
+    "document_type": "consultation_notes",
+    "status": "COMPLETE",
+    "claim_id": "CLM-002",
+    "issues": []
+  },
+  "DOC-020": {
+    "document_id": "DOC-020",
+    "document_type": "medical_receipt",
+    "status": "COMPLETE",
+    "claim_id": "CLM-003",
+    "issues": []
+  },
+  "DOC-021": {
+    "document_id": "DOC-021",
+    "document_type": "itemized_bill",
+    "status": "COMPLETE",
+    "claim_id": "CLM-003",
+    "issues": []
+  }
+}

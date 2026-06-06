@@ -1,0 +1,21 @@
+# Single public entrypoint. Everything reaches the stack through this one port.
+# /api/*  -> FastAPI backend (claim assessment, OCR, RAG, workflow)
+# /*      -> Next.js frontend
+#
+# :80 inside the container; the host port is mapped in docker-compose.yml.
+:80 {
+	encode gzip
+
+	# Backend API. flush_interval -1 disables buffering so SSE streams
+	# (/api/assess/stream, /api/ocr/extract/stream) flush token-by-token.
+	handle /api/* {
+		reverse_proxy backend:8000 {
+			flush_interval -1
+		}
+	}
+
+	# Everything else is the Next.js app.
+	handle {
+		reverse_proxy web:3000
+	}
+}

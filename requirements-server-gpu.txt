@@ -1,0 +1,13 @@
+# GPU runtime deps for the FastAPI backend. Same as requirements-server.txt but
+# swaps fastembed -> fastembed-gpu (pulls onnxruntime-gpu, CUDA 12 + cuDNN 9).
+fastapi==0.136.3
+uvicorn[standard]==0.48.0
+python-multipart==0.0.30
+python-dotenv==1.2.2
+pydantic==2.13.4
+httpx==0.28.1
+requests==2.34.2
+numpy==2.4.6
+openai==2.38.0
+fastembed-gpu==0.8.0
+pillow==12.2.0

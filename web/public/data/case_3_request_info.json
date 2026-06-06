@@ -1,0 +1,92 @@
+{
+  "claim_id": "CLM-003",
+  "recommendation": "REQUEST_MORE_INFO",
+  "recommendation_reason": "Missing required documents for INPATIENT claim: discharge_summary. Please submit the missing documents to proceed with assessment.",
+  "report": {
+    "document_review": [
+      {
+        "document_id": "DOC-020",
+        "type": "medical_receipt",
+        "status": "COMPLETE",
+        "issues": "None"
+      },
+      {
+        "document_id": "DOC-021",
+        "type": "itemized_bill",
+        "status": "COMPLETE",
+        "issues": "None"
+      }
+    ],
+    "policy_verification": {
+      "policy_active": true,
+      "member_covered": true,
+      "claim_type_covered": true,
+      "coverage_period_valid": true,
+      "details": "Policy POL-003 is ACTIVE from 2024-01-01 to 2024-12-31. Member MBR-020 is listed on the policy. INPATIENT benefit with Surgery sub-benefit is covered. Claim date 2024-04-20 falls within the coverage period. Provider Bangkok Hospital is a network hospital. INPATIENT copay is 0%. No deductible applies."
+    },
+    "medical_necessity": {
+      "is_appropriate": null,
+      "reasoning": "Not available",
+      "warnings": []
+    },
+    "benefit_calculation": {
+      "submitted_amount": "150,000 THB",
+      "covered_amount": "Not available",
+      "copay_amount": "Not available",
+      "member_pays": "Not available",
+      "remaining_limit": "Not available",
+      "breakdown": "Not available \u2014 pending receipt of discharge_summary and completion of medical necessity check."
+    },
+    "recommendation": {
+      "decision": "REQUEST_MORE_INFO",
+      "reasoning": "Required document discharge_summary is missing for INPATIENT claim CLM-003. Medical necessity check and benefit calculation cannot be completed without this document. Per standard INPATIENT claim requirements, a discharge summary is mandatory to verify diagnosis, treatment duration, room type, and procedure details.",
+      "next_steps": "Request the member or provider to submit the discharge_summary. Upon receipt, re-run medical necessity check and benefit calculation to complete the assessment."
+    },
+    "policy_citations": [
+      {
+        "clause": "T&C 8.1",
+        "relevance": "Pre-existing conditions within first 12 months \u2014 may apply if acute appendicitis is determined to be pre-existing; requires clinical review of discharge summary to assess."
+      },
+      {
+        "clause": "T&C 8.2",
+        "relevance": "Cosmetic surgery and elective procedures \u2014 not applicable; appendectomy (CPT 44950) for acute appendicitis is not cosmetic or elective."
+      }
+    ]
+  },
+  "tool_call_log": [
+    {
+      "tool_name": "lookupPolicy",
+      "inputs": {
+        "policy_id": "POL-003"
+      },
+      "outputs": {
+        "status": "ACTIVE",
+        "benefits_count": 2
+      }
+    },
+    {
+      "tool_name": "verifyDocument",
+      "inputs": {
+        "document_id": "DOC-020"
+      },
+      "outputs": {
+        "document_id": "DOC-020",
+        "document_type": "medical_receipt",
+        "status": "COMPLETE",
+        "issues": []
+      }
+    },
+    {
+      "tool_name": "verifyDocument",
+      "inputs": {
+        "document_id": "DOC-021"
+      },
+      "outputs": {
+        "document_id": "DOC-021",
+        "document_type": "itemized_bill",
+        "status": "COMPLETE",
+        "issues": []
+      }
+    }
+  ]
+}

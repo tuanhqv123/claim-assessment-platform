@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* OCR markdown preview (dots.ocr text = markdown, tables = raw HTML).
+   !important defeats Tailwind v4 preflight's `border: 0 solid` reset. */
+.md-content table {
+  border-collapse: collapse !important;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 12px;
+  border: 1px solid #d0d0d0 !important;
+}
+.md-content th,
+.md-content td {
+  border: 1px solid #d0d0d0 !important;
+  padding: 5px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.md-content th {
+  background: #fafafa;
+  font-weight: 600;
+}
+.md-content h1,
+.md-content h2,
+.md-content h3,
+.md-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 10px 0 4px;
+}
+.md-content p {
+  margin: 4px 0;
+}
+.md-content ul,
+.md-content ol {
+  margin: 4px 0;
+  padding-inline-start: 20px;
+}
+.md-content img {
+  max-width: 100%;
+}

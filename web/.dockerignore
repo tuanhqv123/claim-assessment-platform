@@ -1,0 +1,7 @@
+node_modules/
+.next/
+.git/
+npm-debug.log*
+# Built fresh in the image; never inherit the host's dev env or build cache.
+.env.local
+tsconfig.tsbuildinfo
