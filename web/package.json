@@ -19,6 +19,12 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1"
   },
+  "optionalDependencies": {
+    "@next/swc-linux-x64-gnu": "16.2.6",
+    "@next/swc-linux-x64-musl": "16.2.6",
+    "@next/swc-linux-arm64-gnu": "16.2.6",
+    "@next/swc-linux-arm64-musl": "16.2.6"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
