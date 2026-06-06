@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "vercel-build": "npm install --include=optional && next build"
+    "vercel-build": "next build"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.3",
