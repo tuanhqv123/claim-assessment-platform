@@ -6,10 +6,12 @@ and returns the structured schema dict with validation_errors merged in.
 """
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
 from PIL import Image
 
+from src.ocr.document_text import _pdf_to_pngs
 from src.ocr.dots_client import layout_to_text, ocr_layout
 from src.ocr.structurer import structure
 from src.ocr.validation import validate
@@ -22,7 +24,15 @@ def extract_document_stream(image_path: str | Path):
     """
     # Stage A: dots.ocr native layout (bbox + category + text per element).
     yield {"event": "step", "step": "ocr", "label": "Reading document", "status": "running"}
-    layout = ocr_layout(image_path)
+    p = Path(image_path)
+    if p.suffix.lower() == ".pdf":
+        with tempfile.TemporaryDirectory() as tmp:
+            pages = _pdf_to_pngs(p, Path(tmp))
+            layout = []
+            for page in pages:
+                layout.extend(ocr_layout(page))
+    else:
+        layout = ocr_layout(image_path)
     categories = sorted({e.get("category") for e in layout if e.get("category")})
     yield {
         "event": "step", "step": "ocr", "status": "done",
@@ -51,8 +61,11 @@ def extract_document_stream(image_path: str | Path):
         if e and e not in merged:
             merged.append(e)
     structured["validation_errors"] = merged
-    with Image.open(image_path) as img:
-        width, height = img.size
+    if p.suffix.lower() == ".pdf":
+        width, height = 0, 0
+    else:
+        with Image.open(image_path) as img:
+            width, height = img.size
     structured["layout"] = layout
     structured["image_size"] = [width, height]
     yield {"event": "step", "step": "validate", "status": "done", "data": {"issues": len(merged)}}
