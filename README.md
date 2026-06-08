@@ -1,4 +1,22 @@
-# Claim Assessment AI Platform
+# Pumpkin Assessment — Take-Home Submission
+
+---
+
+## Part 1: Logical Questions
+
+Answers are in [`logical_requestion/answers.md`](logical_requestion/answers.md).
+
+| # | Question |
+|---|----------|
+| Q1 | Tại sao nhà là nơi thích nhất dù không phải nơi hấp dẫn nhất? |
+| Q4 | Ký ức sớm nhất bạn nhớ là gì? |
+| Q5 | Lần cuối bạn quên đồ là lần nào? Tại sao biết mình quên ở đâu? |
+| Q12 | Đổ xăng nhanh nhất có thể — xe máy, tiền mặt |
+| Q14 | Thiết kế cửa nhà vệ sinh giải quyết: vệ sinh, riêng tư, luồng người |
+
+---
+
+## Part 2: AI Engineering Challenges
 
 A multi-tenant health-insurance **claims platform** built around an LLM **claim-assessment agent**. A member uploads a receipt, OCR extracts it, a state-machine drives the claim lifecycle, and an AI agent — backed by **RAG over the policy document** and a **deterministic guard layer** — produces an auditable APPROVE / REJECT / REQUEST_MORE_INFO recommendation that a human assessor finalizes.
 
@@ -6,7 +24,7 @@ A multi-tenant health-insurance **claims platform** built around an LLM **claim-
 
 ---
 
-## 1. Which parts of the brief are implemented
+### 1. Which parts of the brief are implemented
 
 | Challenge | Scope | Where |
 |-----------|-------|-------|
@@ -19,7 +37,7 @@ Out of scope: fraud (10), cross-border law (12), partner SDK (13).
 
 ---
 
-## 2. Features
+### 2. Features
 
 - **Member portal** — pick insurer, upload documents (auto-OCR + prefill), submit a claim; **policy & member chosen from dropdowns** (member list filtered to those enrolled in the selected policy).
 - **OCR pipeline** — dots.ocr layout mode (headings/tables/reading order preserved) + a structuring LLM pass → typed fields, per-field confidence, validation errors (e.g. receipt total mismatch). PDFs rasterized page-by-page via poppler.
@@ -32,9 +50,9 @@ Out of scope: fraud (10), cross-border law (12), partner SDK (13).
 
 ---
 
-## 3. Architecture
+### 3. Architecture
 
-### System
+#### System
 
 ```
                        ┌──────────────────────────────┐
@@ -63,7 +81,7 @@ Out of scope: fraud (10), cross-border law (12), partner SDK (13).
                        └──────────────────────────────┘
 ```
 
-### Layers (backend)
+#### Layers (backend)
 
 | Layer | Responsibility | Modules |
 |-------|----------------|---------|
@@ -77,7 +95,7 @@ Out of scope: fraud (10), cross-border law (12), partner SDK (13).
 | **Tenant** | Config schema, validation, diff, runtime `processClaim` | `src/tenant/` |
 | **Data access** | Supabase REST / RPC / Storage; config | `src/db.py`, `src/config.py`, `src/stores/` |
 
-### End-to-end flow
+#### End-to-end flow
 
 ```
 Member uploads receipt ─► OCR (08) ─► fields + confidence ─► create claim
@@ -97,7 +115,7 @@ Required documents, approval tiers and custom fields all come from the **tenant 
 
 ---
 
-## 4. Tech stack
+### 4. Tech stack
 
 - **Backend:** Python 3.12, FastAPI, OpenAI-compatible LLM client, **fastembed** (bge-small-en-v1.5, ONNX — CPU or CUDA), **dots.ocr** (vision OCR via vLLM), poppler (`pdftoppm`).
 - **Frontend:** Next.js 16 (App Router), React 19, Ant Design 6, TypeScript.
@@ -106,7 +124,7 @@ Required documents, approval tiers and custom fields all come from the **tenant 
 
 ---
 
-## 5. Repository layout
+### 5. Repository layout
 
 ```
 api.py                      FastAPI app (all endpoints)
@@ -123,6 +141,7 @@ config/workflow.json        workflow state machine definition
 supabase/migrations/        Postgres + pgvector schema (incl. medical_codes,
                             policies, members — all reference/data lives in DB)
 web/                        Next.js frontend (member / assessor / admin)
+logical_requestion/         answers to logical questions
 Dockerfile(.gpu)            backend images (CPU / CUDA)
 docker-compose*.yml         single-port stack / backend-only deploy
 DEPLOY.md                   deployment guide
@@ -130,12 +149,12 @@ DEPLOY.md                   deployment guide
 
 ---
 
-## 6. Setup (local)
+### 6. Setup (local)
 
-### Prerequisites
+#### Prerequisites
 - Python 3.12, Node 20+, poppler (`pdftoppm`), a Supabase project, and reachable LLM + OCR endpoints.
 
-### a. Configure secrets
+#### a. Configure secrets
 ```bash
 cp .env.example .env        # then fill in the values below
 ```
@@ -148,20 +167,20 @@ cp .env.example .env        # then fill in the values below
 
 > Nothing is hardcoded in source — every endpoint/model/key is read from the environment via `src/config.py:require_env`.
 
-### b. Database
+#### b. Database
 ```bash
 supabase link --project-ref <ref>
 supabase db push            # applies supabase/migrations/*
 ```
 
-### c. Backend
+#### c. Backend
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-server.txt        # use requirements-server-gpu.txt for CUDA
 uvicorn api:app --host 0.0.0.0 --port 8000
 ```
 
-### d. Frontend
+#### d. Frontend
 ```bash
 cd web
 npm install
@@ -173,7 +192,7 @@ Open `http://localhost:3000` → **Member** (submit a claim), **Assessor** (revi
 
 ---
 
-## 7. Deployment
+### 7. Deployment
 
 See **[DEPLOY.md](DEPLOY.md)**. Two supported shapes:
 
@@ -182,7 +201,7 @@ See **[DEPLOY.md](DEPLOY.md)**. Two supported shapes:
 
 ---
 
-## 8. Key design decisions
+### 8. Key design decisions
 
 - **Deterministic guard over the LLM** — money, limits and *enrollment* are compliance-critical, so they are guaranteed in code (`guard.py` + the eligibility backstop in `assessment.py`), not left to LLM probability. The LLM writes the *reasoning*; the guard owns the *verdict's hard constraints*.
 - **RAG only where it helps** — numbers/limits are structured lookups; long prose (exclusions, definitions) is retrieved semantically from the actual policy document.
