@@ -160,7 +160,7 @@ def _parse_layout(content: str) -> list[dict]:
     return elements
 
 
-def ocr_layout(image_path: str | Path, timeout: float = 180.0) -> list[dict]:
+def ocr_layout(image_path: str | Path, timeout: float = 180.0, retries: int = 3) -> list[dict]:
     """Return the document layout from dots.ocr as a list of layout elements.
 
     Each element is {"bbox": [x1, y1, x2, y2], "category": str, "text": str},
@@ -168,8 +168,16 @@ def ocr_layout(image_path: str | Path, timeout: float = 180.0) -> list[dict]:
     are in the image's pixel space; elements are in human reading order.
     """
     data_url = _image_data_url(image_path)
-    content = _post_chat(LAYOUT_PROMPT, data_url, timeout)
-    return _parse_layout(content)
+    last_exc: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            content = _post_chat(LAYOUT_PROMPT, data_url, timeout)
+            return _parse_layout(content)
+        except (RuntimeError, Exception) as exc:
+            last_exc = exc
+            if attempt == retries:
+                break
+    raise RuntimeError(f"dots.ocr failed after {retries} attempts: {last_exc}") from last_exc
 
 
 def layout_to_text(elements: list[dict]) -> str:
