@@ -76,7 +76,7 @@ function OcrStepList({ steps }: { steps: OcrStepEvent[] }) {
 
 const { Dragger } = Upload;
 
-const ACCEPT = "image/*,application/pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,.pdf";
+const ACCEPT = "image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff";
 
 export interface UploadedDoc {
   uid: string;
@@ -132,12 +132,15 @@ export default function DocumentUploadCard({ onDocsChange }: Props) {
   }, []);
 
   const beforeUpload = (file: File) => {
+    if (docs.length >= 1) {
+      message.error("Only one document can be uploaded at a time.");
+      return Upload.LIST_IGNORE;
+    }
     const ok =
       file.type.startsWith("image/") ||
-      file.type === "application/pdf" ||
-      /\.(png|jpe?g|webp|gif|bmp|tiff?|pdf)$/i.test(file.name);
+      /\.(png|jpe?g|webp|gif|bmp|tiff?)$/i.test(file.name);
     if (!ok) {
-      message.error(`${file.name} is not an image or PDF.`);
+      message.error(`${file.name} is not a supported image format.`);
       return Upload.LIST_IGNORE;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -207,7 +210,7 @@ export default function DocumentUploadCard({ onDocsChange }: Props) {
 
   const uploadProps: UploadProps = {
     accept: ACCEPT,
-    multiple: true,
+    multiple: false,
     fileList,
     beforeUpload,
     customRequest,
@@ -248,7 +251,7 @@ export default function DocumentUploadCard({ onDocsChange }: Props) {
                 Click or drag a document to upload
               </Text>
               <Text type="secondary" style={{ fontSize: 12 }}>
-                Receipt · discharge summary · lab report · prescription
+                PNG · JPG · WEBP · BMP · TIFF · max 5 MB
               </Text>
             </Flex>
           </Dragger>
